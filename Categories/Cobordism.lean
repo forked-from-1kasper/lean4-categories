@@ -1,4 +1,5 @@
 import Categories.Colimit
+import Categories.Comma
 
 set_option autoImplicit false
 
@@ -151,6 +152,8 @@ section
       { apply Subtype.eq; funext _; apply (HasInitial.property _).prop } }
   end
 
+  -- this is generalization of an example linked below
+  -- https://mathoverflow.net/a/59696
   def Cocone.cobord : Cobordism (𝐶𝑜𝑐𝑜𝑛𝑒 J C) :=
   { δ        := boundary,
     ι        := boundaryNat,
