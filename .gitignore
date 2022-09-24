@@ -1,0 +1,6 @@
+*.olean
+*.cpp
+*.o
+*.a
+/build
+/lean_packages
