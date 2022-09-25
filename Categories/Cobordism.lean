@@ -6,13 +6,15 @@ set_option autoImplicit false
 namespace Mathematics
 
 structure Cobordism (C : Category) :=
-(δ        : Functor C C)
-(ι        : Natural δ 1)
-(square   : ∀ x, isInitial C (δ (δ x)))
-(additive : isAdditive δ)
+(boundary : Functor C C)
+(ι        : Natural boundary 1)
+(square   : ∀ x, isInitial C (boundary (boundary x)))
+(additive : isAdditive boundary)
+
+notation "∂" => Cobordism.boundary
 
 def Cob {C : Category} [HasCoproducts C] (Γ : Cobordism C) (a b : C.obj) :=
-Σ (u v : C.obj), a + Γ.δ u ≅ b + Γ.δ v
+Σ (u v : C.obj), a + ∂ Γ u ≅ b + ∂ Γ v
 
 section
   variable {J C : Category} [HasInitial C] [HasColimits J C]
@@ -155,7 +157,7 @@ section
   -- this is generalization of an example linked below
   -- https://mathoverflow.net/a/59696
   def Cocone.cobord : Cobordism (𝐶𝑜𝑐𝑜𝑛𝑒 J C) :=
-  { δ        := boundary,
+  { boundary := boundary,
     ι        := boundaryNat,
     square   := boundarySquare,
     additive := boundaryAdditive }
