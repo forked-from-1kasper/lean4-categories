@@ -6,6 +6,8 @@ set_option autoImplicit false
 namespace Mathematics
 
 -- https://ncatlab.org/nlab/show/cobordism+category
+-- https://people.math.umass.edu/~weston/oldpapers/cobord.pdf
+
 -- we do not require existence of all coproducts here,
 -- but require that for φ : ∂ A + ∂ B ≅ ∂ (A + B)
 -- we have φ ∘ inl (∂ A) (∂ B) = ∂ (inl A B) (and so on for “inr”)
@@ -29,6 +31,7 @@ section
   def Cob.symm {a b : C.obj} (φ : Cob Γ a b) : Cob Γ b a :=
   ⟨φ.2.1, φ.1, Iso.symm φ.2.2⟩
 
+  -- probably there should be easier way to obtain this isomorphism
   def Cob.trans {a b c : C.obj} (φ : Cob Γ a b) (ψ : Cob Γ b c) : Cob Γ a c :=
   ⟨φ.1 + ψ.1, φ.2.1 + ψ.2.1, coproductApLeft (additiveIso Γ.additive)⁻¹
                            ⬝ coproductAssoc _ _ _
