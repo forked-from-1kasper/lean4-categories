@@ -11,6 +11,13 @@ namespace Mathematics
 -- we do not require existence of all coproducts here,
 -- but require that for φ : ∂ A + ∂ B ≅ ∂ (A + B)
 -- we have φ ∘ inl (∂ A) (∂ B) = ∂ (inl A B) (and so on for “inr”)
+
+-- possible lack of all coproducts leaves some flexibility, because, for example,
+-- if we require all manifolds to have some fixed (for each manifold) dimension,
+-- then there will be no coproducts of manifolds with different dimensions,
+-- while we still can form category with all continuous maps between them
+
+-- also note that there is no initial object in such C iff it is empty
 structure Cobordism (C : Category) :=
 (boundary : Functor C C)
 (ι        : Natural boundary 1)
