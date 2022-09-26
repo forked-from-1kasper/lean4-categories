@@ -1,4 +1,5 @@
 import Categories.Functor
+import Categories.Initial
 
 set_option autoImplicit false
 
@@ -180,7 +181,27 @@ def additiveIso {A B : Category} [HasCoproducts A] [HasCoproducts B] {F : Functo
   (H : isAdditive F) {x y : A.obj} : F x + F y ≅ F (x + y) :=
 begin apply coproductUniq; apply HasCoproducts.property; apply H; apply HasCoproducts.property end
 
-def coproductSymm {C : Category} [HasCoproducts C] (a b : C.obj) : a + b ≅ b + a :=
+def coproductInitialLeft {C : Category} [HasCoproducts C] (a b : C.obj) (H : isInitial C b) : a + b ≅ a :=
+begin
+  exists HasCoproducts.recur (C.id a) (H a).inh; exists inl _ _;
+  constructor; apply HasCoproducts.recurβ₁;
+  { apply HasCoproducts.prop;
+    { show _ = inl _ _; rw [C.assoc, HasCoproducts.recurβ₁]; apply C.rid };
+    { show _ = inr _ _; rw [C.assoc, HasCoproducts.recurβ₂]; apply (H _).prop };
+    repeat { apply C.lid } }
+end
+
+def coproductInitialRight {C : Category} [HasCoproducts C] (a b : C.obj) (H : isInitial C a) : a + b ≅ b :=
+begin
+  exists HasCoproducts.recur (H b).inh (C.id b); exists inr _ _;
+  constructor; apply HasCoproducts.recurβ₂;
+  { apply HasCoproducts.prop;
+    { show _ = inl _ _; rw [C.assoc, HasCoproducts.recurβ₁]; apply (H _).prop };
+    { show _ = inr _ _; rw [C.assoc, HasCoproducts.recurβ₂]; apply C.rid };
+    repeat { apply C.lid } }
+end
+
+def coproductComm {C : Category} [HasCoproducts C] (a b : C.obj) : a + b ≅ b + a :=
 begin
   exists HasCoproducts.recur (inr b a) (inl b a);
   exists HasCoproducts.recur (inr a b) (inl a b);

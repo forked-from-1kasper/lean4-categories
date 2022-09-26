@@ -37,11 +37,18 @@ section
                            ⬝ coproductAssoc _ _ _
                            ⬝ coproductApRight φ.2.2
                            ⬝ (coproductAssoc _ _ _)⁻¹
-                           ⬝ coproductApLeft (coproductSymm _ _)
+                           ⬝ coproductApLeft (coproductComm _ _)
                            ⬝ coproductAssoc _ _ _
                            ⬝ coproductApRight ψ.2.2
                            ⬝ (coproductAssoc _ _ _)⁻¹
-                           ⬝ coproductApLeft ((coproductSymm _ _)⁻¹ ⬝ additiveIso Γ.additive)⟩
+                           ⬝ coproductApLeft ((coproductComm _ _)⁻¹ ⬝ additiveIso Γ.additive)⟩
+
+  def Cob.boundary {a b : C.obj} (φ : Cob Γ a b) : ∂ Γ a ≅ ∂ Γ b :=
+    (coproductInitialLeft _ _ (Γ.square φ.1))⁻¹ ⬝ additiveIso Γ.additive
+  ⬝ functorIso _ φ.2.2 ⬝ (additiveIso Γ.additive)⁻¹ ⬝ coproductInitialLeft _ _ (Γ.square _)
+
+  def Cob.idem (m : C.obj) : Cob Γ (∂ Γ m) (∂ Γ (∂ Γ m)) :=
+  ⟨∂ Γ m, m, coproductInitialLeft _ _ (Γ.square m) ⬝ (coproductInitialRight _ _ (Γ.square m))⁻¹⟩
 end
 
 def Cob.isomorphism {C : Category} [HasCoproducts C] {Γ : Cobordism C} {a b : C.obj} (φ ψ : Cob Γ a b) :=
