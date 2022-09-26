@@ -5,6 +5,10 @@ set_option autoImplicit false
 
 namespace Mathematics
 
+-- https://ncatlab.org/nlab/show/cobordism+category
+-- we do not require existence of all coproducts here,
+-- but require that for φ : ∂ A + ∂ B ≅ ∂ (A + B)
+-- we have φ ∘ inl (∂ A) (∂ B) = ∂ (inl A B) (and so on for “inr”)
 structure Cobordism (C : Category) :=
 (boundary : Functor C C)
 (ι        : Natural boundary 1)
@@ -15,6 +19,30 @@ notation "∂" => Cobordism.boundary
 
 def Cob {C : Category} [HasCoproducts C] (Γ : Cobordism C) (a b : C.obj) :=
 Σ (u v : C.obj), a + ∂ Γ u ≅ b + ∂ Γ v
+
+section
+  variable {C : Category} [HasCoproducts C] (Γ : Cobordism C)
+
+  def Cob.refl (a : C.obj) : Cob Γ a a :=
+  ⟨a, a, Iso.refl _⟩
+
+  def Cob.symm {a b : C.obj} (φ : Cob Γ a b) : Cob Γ b a :=
+  ⟨φ.2.1, φ.1, Iso.symm φ.2.2⟩
+
+  def Cob.trans {a b c : C.obj} (φ : Cob Γ a b) (ψ : Cob Γ b c) : Cob Γ a c :=
+  ⟨φ.1 + ψ.1, φ.2.1 + ψ.2.1, coproductApLeft (additiveIso Γ.additive)⁻¹
+                           ⬝ coproductAssoc _ _ _
+                           ⬝ coproductApRight φ.2.2
+                           ⬝ (coproductAssoc _ _ _)⁻¹
+                           ⬝ coproductApLeft (coproductSymm _ _)
+                           ⬝ coproductAssoc _ _ _
+                           ⬝ coproductApRight ψ.2.2
+                           ⬝ (coproductAssoc _ _ _)⁻¹
+                           ⬝ coproductApLeft ((coproductSymm _ _)⁻¹ ⬝ additiveIso Γ.additive)⟩
+end
+
+def Cob.isomorphism {C : Category} [HasCoproducts C] {Γ : Cobordism C} {a b : C.obj} (φ ψ : Cob Γ a b) :=
+{ w : φ.1 ≅ ψ.1 × φ.2.1 ≅ ψ.2.1 // madd 1 ((∂ Γ).map w.2.1) ∘ φ.2.2.1 = ψ.2.2.1 ∘ madd 1 ((∂ Γ).map w.1.1) }
 
 section
   variable {J C : Category} [HasInitial C] [HasColimits J C]
@@ -105,7 +133,7 @@ section
   begin
     intro c f₁ f₂; apply Subtype.mk _ _;
     { apply Subtype.mk _ _; constructor;
-      { apply HasCoproducts.recur _ _ _ f₁.1.1 f₂.1.1 };
+      { apply HasCoproducts.recur f₁.1.1 f₂.1.1 };
       { apply Natural.recur _ _ f₁.1.2 f₂.1.2 };
       { intros; apply Eq.trans; apply maddRec;
         apply Eq.symm; apply Eq.trans; apply Eq.symm; apply HasCoproducts.comm;

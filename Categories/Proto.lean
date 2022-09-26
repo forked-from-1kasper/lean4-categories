@@ -78,6 +78,8 @@ begin exists 1; exists 1; constructor <;> apply C.lid end
 def Iso.symm {C : Category} {a b : C.obj} : a ≅ b → b ≅ a :=
 begin intro H; exists H.2.1; exists H.1; constructor; exact H.2.2.2; exact H.2.2.1 end
 
+postfix:max "⁻¹" => Iso.symm
+
 def hasInvCom {C : Category} {a b c : C.obj} {f : Hom C b c} {g : Hom C a b} :
   hasInv f → hasInv g → hasInv (f ∘ g) :=
 begin
@@ -90,6 +92,8 @@ end
 
 def Iso.trans {C : Category} {a b c : C.obj} : a ≅ b → b ≅ c → a ≅ c :=
 begin intro H₁ H₂; exists H₂.1 ∘ H₁.1; apply hasInvCom; exact H₂.2; exact H₁.2 end
+
+infixl:70 " ⬝ " => Iso.trans
 
 def isoInterchange₁ {C : Category} {a b c : C.obj} {φ : b ≅ c} {f : Hom C a b} {g : Hom C a c} : φ.1 ∘ f = g → f = φ.2.1 ∘ g :=
 begin intro H; rw [←C.lid f]; apply Eq.trans; apply congrArg (· ∘ f); apply Eq.symm φ.2.2.2; rw [C.assoc, H] end

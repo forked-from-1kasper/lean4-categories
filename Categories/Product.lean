@@ -24,24 +24,24 @@ instance (C : Category) [H : HasCoproducts C] : Add C.obj := ⟨H.μ⟩
 open HasCoproducts (inl inr)
 
 namespace HasCoproducts
-  variable {C : Category} [HasCoproducts C] (a b c : C.obj) (f : Hom C a c) (g : Hom C b c)
+  variable {C : Category} [HasCoproducts C] {a b c : C.obj} (f : Hom C a c) (g : Hom C b c)
 
   def recur : Hom C (a + b) c :=
   (HasCoproducts.property a b c f g).val
 
-  def recurβ₁ : recur a b c f g ∘ inl a b = f :=
+  def recurβ₁ : recur f g ∘ inl a b = f :=
   (HasCoproducts.property a b c f g).property.left.left
 
-  def recurβ₂ : recur a b c f g ∘ inr a b = g :=
+  def recurβ₂ : recur f g ∘ inr a b = g :=
   (HasCoproducts.property a b c f g).property.left.right
 
-  def uniq : ∀ (φ : Hom C (a + b) c), φ ∘ inl a b = f → φ ∘ inr a b = g → recur a b c f g = φ :=
+  def uniq : ∀ (φ : Hom C (a + b) c), φ ∘ inl a b = f → φ ∘ inr a b = g → recur f g = φ :=
   λ _ h₁ h₂, (HasCoproducts.property _ _ _ _ _).property.right _ (And.intro h₁ h₂)
 
   def prop : ∀ (φ ψ : Hom C (a + b) c), φ ∘ inl a b = f → φ ∘ inr a b = g → ψ ∘ inl a b = f → ψ ∘ inr a b = g → φ = ψ :=
   begin intros; apply Eq.trans; apply Eq.symm; repeat { apply uniq <;> assumption } end
 
-  def comm {d : C.obj} (h : Hom C c d) : recur a b d (h ∘ f) (h ∘ g) = h ∘ recur a b c f g :=
+  def comm {d : C.obj} (h : Hom C c d) : recur (h ∘ f) (h ∘ g) = h ∘ recur f g :=
   begin apply uniq <;> rw [C.assoc]; rw [recurβ₁]; rw [recurβ₂] end
 end HasCoproducts
 
@@ -49,14 +49,17 @@ section
   variable {C : Category} [HasCoproducts C] {a₁ a₂ b₁ b₂ : C.obj} (f : Hom C a₁ a₂) (g : Hom C b₁ b₂)
 
   def madd : Hom C (a₁ + b₁) (a₂ + b₂) :=
-  HasCoproducts.recur a₁ b₁ (a₂ + b₂) (inl _ _ ∘ f) (inr _ _ ∘ g)
+  HasCoproducts.recur (inl _ _ ∘ f) (inr _ _ ∘ g)
 
   lemma maddInl : madd f g ∘ inl a₁ b₁ = inl a₂ b₂ ∘ f :=
-  HasCoproducts.recurβ₁ _ _ _ _ _
+  HasCoproducts.recurβ₁ _ _
 
   lemma maddInr : madd f g ∘ inr a₁ b₁ = inr a₂ b₂ ∘ g :=
-  HasCoproducts.recurβ₂ _ _ _ _ _
+  HasCoproducts.recurβ₂ _ _
 end
+
+lemma maddId {C : Category} [HasCoproducts C] (a b : C.obj) : madd (C.id a) (C.id b) = 1 :=
+begin apply HasCoproducts.uniq <;> rw [C.rid] <;> apply C.lid end
 
 theorem maddCom {C : Category} [HasCoproducts C] {a₁ a₂ a₃ b₁ b₂ b₃ : C.obj}
   (f₁ : Hom C a₂ a₃) (g₁ : Hom C b₂ b₃) (f₂ : Hom C a₁ a₂) (g₂ : Hom C b₁ b₂) :
@@ -69,7 +72,7 @@ end
 
 theorem maddRec {C : Category} [HasCoproducts C] {a₁ a₂ b₁ b₂ c : C.obj}
   (f : Hom C a₁ a₂) (g : Hom C b₁ b₂) (φ : Hom C a₂ c) (ψ : Hom C b₂ c) :
-  HasCoproducts.recur a₂ b₂ c φ ψ ∘ madd f g = HasCoproducts.recur a₁ b₁ c (φ ∘ f) (ψ ∘ g) :=
+  HasCoproducts.recur φ ψ ∘ madd f g = HasCoproducts.recur (φ ∘ f) (ψ ∘ g) :=
 begin
   apply Eq.symm; apply HasCoproducts.uniq <;> rw [C.assoc];
   rw [maddInl, ←C.assoc, HasCoproducts.recurβ₁];
@@ -104,7 +107,7 @@ section
   variable {H : Functor A B} (η : Natural F H) (ε : Natural G H)
 
   def Natural.recur : Natural (Functor.add F G) H :=
-  ⟨λ x, HasCoproducts.recur (F x) (G x) _ (η x) (ε x),
+  ⟨λ x, HasCoproducts.recur (η x) (ε x),
    begin
      intros a b f; apply Eq.trans; apply maddRec; apply HasCoproducts.uniq;
      rw [B.assoc, HasCoproducts.recurβ₁, η.property];
@@ -171,4 +174,51 @@ begin
     apply Eq.trans; apply Eq.symm (F.com _ _);
     apply congrArg; apply HasCoproducts.recurβ₂ };
   apply HasCoproducts.property
+end
+
+def additiveIso {A B : Category} [HasCoproducts A] [HasCoproducts B] {F : Functor A B}
+  (H : isAdditive F) {x y : A.obj} : F x + F y ≅ F (x + y) :=
+begin apply coproductUniq; apply HasCoproducts.property; apply H; apply HasCoproducts.property end
+
+def coproductSymm {C : Category} [HasCoproducts C] (a b : C.obj) : a + b ≅ b + a :=
+begin
+  exists HasCoproducts.recur (inr b a) (inl b a);
+  exists HasCoproducts.recur (inr a b) (inl a b);
+  constructor <;>
+  { apply HasCoproducts.prop;
+    { show _ = inl _ _; rw [C.assoc, HasCoproducts.recurβ₁, HasCoproducts.recurβ₂] };
+    { show _ = inr _ _; rw [C.assoc, HasCoproducts.recurβ₂, HasCoproducts.recurβ₁] };
+    repeat { apply C.lid } };
+end
+
+def coproductAssoc {C : Category} [HasCoproducts C] (a b c : C.obj) : a + (b + c) ≅ (a + b) + c :=
+begin
+  exists HasCoproducts.recur (inl _ _ ∘ inl _ _) (HasCoproducts.recur (inl _ _ ∘ inr _ _) (inr _ _));
+  exists HasCoproducts.recur (HasCoproducts.recur (inl _ _) (inr _ _ ∘ inl _ _)) (inr _ _ ∘ inr _ _); constructor;
+  { apply HasCoproducts.prop;
+    { show _ = inl _ _; rw [C.assoc, HasCoproducts.recurβ₁]; apply HasCoproducts.prop;
+      { show _ = inl _ _ ∘ inl _ _; rw [C.assoc, HasCoproducts.recurβ₁]; apply HasCoproducts.recurβ₁ };
+      { show _ = inl _ _ ∘ inr _ _; rw [C.assoc, HasCoproducts.recurβ₂, ←C.assoc, HasCoproducts.recurβ₂]; apply HasCoproducts.recurβ₁ }; rfl; rfl };
+    { show _ = inr _ _; rw [C.assoc, HasCoproducts.recurβ₂, ←C.assoc, HasCoproducts.recurβ₂, HasCoproducts.recurβ₂] };
+    repeat { apply C.lid } };
+  { apply HasCoproducts.prop;
+    { show _ = inl _ _; rw [C.assoc, HasCoproducts.recurβ₁, ←C.assoc, HasCoproducts.recurβ₁, HasCoproducts.recurβ₁] };
+    { show _ = inr _ _; rw [C.assoc, HasCoproducts.recurβ₂]; apply HasCoproducts.prop;
+      { show _ = inr _ _ ∘ inl _ _; rw [C.assoc, HasCoproducts.recurβ₁, ←C.assoc, HasCoproducts.recurβ₁]; apply HasCoproducts.recurβ₂ };
+      { show _ = inr _ _ ∘ inr _ _; rw [C.assoc, HasCoproducts.recurβ₂] apply HasCoproducts.recurβ₂ }; rfl; rfl };
+  repeat { apply C.lid } }
+end
+
+def coproductApLeft {C : Category} [HasCoproducts C] {a b c : C.obj} (H : a ≅ b) : c + a ≅ c + b :=
+begin
+  exists madd (C.id c) H.1; exists madd (C.id c) H.2.1; constructor;
+  { rw [maddCom, C.lid, H.2.2.1]; apply maddId };
+  { rw [maddCom, C.lid, H.2.2.2]; apply maddId }
+end
+
+def coproductApRight {C : Category} [HasCoproducts C] {a b c : C.obj} (H : a ≅ b) : a + c ≅ b + c :=
+begin
+  exists madd H.1 (C.id c); exists madd H.2.1 (C.id c); constructor;
+  { rw [maddCom, C.lid, H.2.2.1]; apply maddId };
+  { rw [maddCom, C.lid, H.2.2.2]; apply maddId }
 end
