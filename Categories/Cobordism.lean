@@ -61,6 +61,18 @@ end
 def Cob.isomorphism {C : Category} [HasCoproducts C] {Γ : Cobordism C} {a b : C.obj} (φ ψ : Cob Γ a b) :=
 { w : φ.1 ≅ ψ.1 × φ.2.1 ≅ ψ.2.1 // madd 1 ((∂ Γ).map w.2.1) ∘ φ.2.2.1 = ψ.2.2.1 ∘ madd 1 ((∂ Γ).map w.1.1) }
 
+def Cob.isorefl {C : Category} [HasCoproducts C] {Γ : Cobordism C} {a b : C.obj} (φ : Cob Γ a b) : Cob.isomorphism φ φ :=
+⟨(Iso.refl _, Iso.refl _), begin
+                             show madd 1 (Γ.boundary.map 1) ∘ _ = _ ∘ madd 1 (Γ.boundary.map 1);
+                             rw [Γ.boundary.idm, Γ.boundary.idm]; apply Eq.trans;
+                             apply congrArg (· ∘ _); apply maddId; apply Eq.symm;
+                             apply Eq.trans; apply congrArg; apply maddId;
+                             apply Eq.trans; apply C.rid; apply Eq.symm (C.lid _)
+                           end⟩
+
+def isClosed {C : Category} (Γ : Cobordism C) (m : C.obj) := ∂ Γ m ≅ ∂ Γ (∂ Γ m)
+def bounds {C : Category} [HasCoproducts C] (Γ : Cobordism C) (m : C.obj) := Cob Γ m (∂ Γ (∂ Γ m))
+
 section
   variable {J C : Category} [HasInitial C] [HasColimits J C]
 

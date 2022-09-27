@@ -22,7 +22,11 @@ section
 end
 
 class HasInitial (C : Category) :=
-(ε        : C.obj)
-(property : isInitial C ε)
+(ε : C.obj) (property : isInitial C ε)
 
 instance (C : Category) [H : HasInitial C] : OfNat C.obj 0 := ⟨H.ε⟩
+
+class HasTerminal (C : Category) :=
+(τ : C.obj) (property : isTerminal C τ)
+
+instance (C : Category) [H : HasTerminal C] : OfNat C.obj 1 := ⟨H.τ⟩
