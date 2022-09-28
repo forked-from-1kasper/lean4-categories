@@ -226,8 +226,9 @@ begin
     { show _ = inl _ _; rw [C.assoc, HasCoproducts.recurβ₁, ←C.assoc, HasCoproducts.recurβ₁, HasCoproducts.recurβ₁] };
     { show _ = inr _ _; rw [C.assoc, HasCoproducts.recurβ₂]; apply HasCoproducts.prop;
       { show _ = inr _ _ ∘ inl _ _; rw [C.assoc, HasCoproducts.recurβ₁, ←C.assoc, HasCoproducts.recurβ₁]; apply HasCoproducts.recurβ₂ };
-      { show _ = inr _ _ ∘ inr _ _; rw [C.assoc, HasCoproducts.recurβ₂] apply HasCoproducts.recurβ₂ }; rfl; rfl };
-  repeat { apply C.lid } }
+      { show _ = inr _ _ ∘ inr _ _; rw [C.assoc, HasCoproducts.recurβ₂]; apply HasCoproducts.recurβ₂ }; rfl; rfl };
+    { apply C.lid };
+    { apply C.lid } }
 end
 
 def coproductApLeft {C : Category} [HasCoproducts C] {a b c : C.obj} (H : a ≅ b) : c + a ≅ c + b :=
