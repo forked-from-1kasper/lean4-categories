@@ -5,7 +5,6 @@ syntax "Π" many1(binderIdent <|> bracketedBinder) ", " term : term
 macro_rules | `(Π $xs*, $y) => `(∀ $xs*, $y)
 
 macro "λ " xs:many1(funBinder) ", " f:term : term => `(fun $xs* => $f)
-macro xs:many1(funBinder) " ↦ " f:term : term => `(fun $xs* => $f)
 
 macro mods:declModifiers "lemma" n:declId sig:declSig val:declVal : command =>
   `($mods:declModifiers theorem $n $sig $val)
