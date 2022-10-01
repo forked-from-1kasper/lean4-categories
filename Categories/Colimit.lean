@@ -19,6 +19,8 @@ def isColimit {J C : Category} {F : Functor J C} (L : F-cocone) :=
 def Cocone (J C : Category) :=
 Σ (w : Functor J C × C.obj), isCocone w.1 w.2
 
+def Cocone.cone {J C : Category} (L : Cocone J C) : L.1.1-cocone := ⟨L.1.2, L.2⟩
+
 section
   variable {J C : Category}
 
@@ -60,10 +62,22 @@ class HasColimits (J C : Category) :=
 
 open HasColimits (colim)
 
-def colimZero {J C : Category} {ε : C.obj} {L : (@Δ J C ε)-cocone} : isInitial C ε → isColimit L → isInitial C L.1 :=
+def colimInitial {J C : Category} {F : Functor J C} {L : F-cocone} (H₁ : ∀ x, isInitial C (F x)) (H₂ : isColimit L) : isInitial C L.1 :=
 begin
-  intro H₁ H₂ c; let N : (@Δ J C ε)-cocone := ⟨c, ⟨λ _, (H₁ _).inh, λ _, (H₁ _).prop _ _⟩⟩; constructor; apply (H₂ N).val;
-  { intro f g; apply Eq.trans; apply Eq.symm; repeat { apply (H₂ N).property.right; intros; apply (H₁ _).prop } }
+  intro c; let N : F-cocone := ⟨c, ⟨λ _, (H₁ _ _).inh, λ _, (H₁ _ _).prop _ _⟩⟩; constructor; apply (H₂ N).val;
+  { intro f g; apply Eq.trans; apply Eq.symm; repeat { apply (H₂ N).property.right; intros; apply (H₁ _ _).prop } }
+end
+
+def colimZero {J C : Category} {ε : C.obj} {L : (@Δ J C ε)-cocone} (H₁ : isInitial C ε) (H₂ : isColimit L) : isInitial C L.1 :=
+begin apply colimInitial; intro; apply H₁; exact H₂ end
+
+def Cocone.initial {J C : Category} {L : Cocone J C} (H₁ : isInitial C L.1.2) (H₂ : ∀ x, isInitial C (L.1.1 x)) : isInitial (𝐶𝑜𝑐𝑜𝑛𝑒 J C) L :=
+begin
+  intro c; constructor; apply Subtype.mk (_, _) _; apply (H₁ _).inh;
+  { apply Subtype.mk _ _; intro; apply (H₂ _ _).inh; intros; apply (H₂ _ _).prop };
+  { intro; apply (H₂ _ _).prop };
+  { intro f g; apply Subtype.eq; apply Prod.eq; apply (H₁ _).prop;
+    apply Subtype.eq; funext _; apply (H₂ _ _).prop }
 end
 
 def Cocone.iso {J C : Category} {D₁ D₂ : Cocone J C} (φ : D₁.1.2 ≅ D₂.1.2) (ψ : Functor.iso D₁.1.1 D₂.1.1)

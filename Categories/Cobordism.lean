@@ -73,6 +73,15 @@ def Cob.isorefl {C : Category} [HasCoproducts C] {Γ : Cobordism C} {a b : C.obj
 def isClosed {C : Category} (Γ : Cobordism C) (m : C.obj) := ∂ Γ m ≅ ∂ Γ (∂ Γ m)
 def bounds {C : Category} [HasCoproducts C] (Γ : Cobordism C) (m : C.obj) := Cob Γ m (∂ Γ (∂ Γ m))
 
+def boundaryInital {C : Category} (Γ : Cobordism C) {x : C.obj} (H : isInitial C x) : isInitial C (∂ Γ x) :=
+begin apply initialIso (Γ.square (∂ Γ x)); apply functorIso; apply initialUniq; apply Γ.square; exact H end
+
+def boundaryInitialIso {C : Category} (Γ : Cobordism C) {x : C.obj} (H : isInitial C x) : ∂ Γ x ≅ x :=
+begin apply initialUniq; apply boundaryInital Γ H; exact H end
+
+def boundaryZero {C : Category} [HasInitial C] (Γ : Cobordism C) : ∂ Γ 0 ≅ 0 :=
+boundaryInitialIso Γ HasInitial.property
+
 section
   variable {J C : Category} [HasInitial C] [HasColimits J C]
 
@@ -125,7 +134,7 @@ section
   end
 
   def boundaryNat : @Natural (𝐶𝑜𝑐𝑜𝑛𝑒 J C) (𝐶𝑜𝑐𝑜𝑛𝑒 J C) boundary 1 :=
-  ⟨λ w, ⟨((HasColimits.property _ ⟨w.1.2, w.2⟩).val,
+  ⟨λ w, ⟨((HasColimits.property _ w.cone).val,
          ⟨λ _, (HasInitial.property _).inh, λ _, (HasInitial.property _).prop _ _⟩),
           λ _, (HasInitial.property _).prop _ _⟩,
    begin

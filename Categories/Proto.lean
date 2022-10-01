@@ -101,16 +101,23 @@ begin intro H; rw [←C.lid f]; apply Eq.trans; apply congrArg (· ∘ f); apply
 def isoInterchange₂ {C : Category} {a b c : C.obj} {φ : b ≅ c} {f : Hom C a b} {g : Hom C a c} : f = φ.2.1 ∘ g → φ.1 ∘ f = g :=
 begin intro H; rw [←C.lid g]; apply Eq.symm; apply Eq.trans; apply congrArg (· ∘ g); apply Eq.symm φ.2.2.1; rw [C.assoc, H] end
 
-def isoMono {C : Category} {a b : C.obj} (φ : a ≅ b) : monic φ.1 :=
-begin
-  intro c h k H; rw [←C.lid h]; apply Eq.trans;
-  apply congrArg (· ∘ h); apply Eq.symm φ.2.2.2;
-  rw [C.assoc, H, ←C.assoc, φ.2.2.2]; apply C.lid
-end
+section
+  variable {C : Category} {a b : C.obj} (φ : a ≅ b)
 
-def isoEpic {C : Category} {a b : C.obj} (φ : a ≅ b) : epic φ.1 :=
-begin
-  intro c h k H; rw [←C.rid h]; apply Eq.trans;
-  apply congrArg; apply Eq.symm φ.2.2.1;
-  rw [←C.assoc, H, C.assoc, φ.2.2.1]; apply C.rid
+  def isoMono : monic φ.1 :=
+  begin
+    intro c h k H; rw [←C.lid h]; apply Eq.trans;
+    apply congrArg (· ∘ h); apply Eq.symm φ.2.2.2;
+    rw [C.assoc, H, ←C.assoc, φ.2.2.2]; apply C.lid
+  end
+
+  def isoEpic : epic φ.1 :=
+  begin
+    intro c h k H; rw [←C.rid h]; apply Eq.trans;
+    apply congrArg; apply Eq.symm φ.2.2.1;
+    rw [←C.assoc, H, C.assoc, φ.2.2.1]; apply C.rid
+  end
+
+  def isoMonoRev : monic φ.2.1 := isoMono φ⁻¹
+  def isoEpicRev : epic φ.2.1  := isoEpic φ⁻¹
 end
