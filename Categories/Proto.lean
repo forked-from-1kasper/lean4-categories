@@ -54,6 +54,8 @@ def Opposite (C : Category) : Category :=
 
 postfix:max "ᵒᵖ" => Opposite
 
+example (C : Category) : C = (Cᵒᵖ)ᵒᵖ := rfl
+
 section
   variable {C : Category} {a b : C.obj} (f : Hom C a b)
 
