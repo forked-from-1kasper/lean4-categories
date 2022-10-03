@@ -43,6 +43,28 @@ abbrev Hom := Category.hom
 instance (C : Category) (x : C.obj) : OfNat (Hom C x x) 1 := ⟨C.id x⟩
 infix:70 (priority := high) " ∘ " => Category.com _
 
+def Category.zero : Category :=
+{ obj   := 𝟎,
+  hom   := λ _ _, 𝟎,
+  id    := λ x, nomatch x,
+  com   := λ x _, nomatch x,
+  lid   := λ x, nomatch x,
+  rid   := λ x, nomatch x,
+  assoc := λ x _ _, nomatch x }
+
+notation "𝟘" => Category.zero
+
+def Category.one : Category :=
+{ obj   := 𝟏,
+  hom   := λ _ _, 𝟏,
+  id    := λ ★, ★,
+  com   := λ _ _, ★,
+  lid   := @λ ★ ★ ★ => rfl,
+  rid   := @λ ★ ★ ★ => rfl,
+  assoc := @λ ★ ★ ★ ★ ★ ★ ★ => rfl }
+
+notation "𝟙" => Category.one
+
 def Opposite (C : Category) : Category :=
 { obj   := C.obj,
   hom   := λ a b, C.hom b a,

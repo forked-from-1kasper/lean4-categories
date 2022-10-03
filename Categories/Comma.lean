@@ -41,3 +41,15 @@ def Comma {A B C : Category} (F : Functor A C) (G : Functor B C) : Category :=
   assoc := Comma.assoc }
 
 infix:61 " ↓ " => Comma
+
+def Arrow (C : Category) :=
+idfun C ↓ idfun C
+
+def Slice (C : Category) (c : C.obj) :=
+idfun C ↓ @Δ 𝟙 C c
+
+def Coslice (C : Category) (c : C.obj) :=
+@Δ 𝟙 C c ↓ idfun C
+
+notation C " / " c => Slice C c
+notation c " / " C => Coslice C c
