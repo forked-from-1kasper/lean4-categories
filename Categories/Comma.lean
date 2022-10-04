@@ -1,4 +1,5 @@
 import Categories.Functor
+import Categories.Initial
 
 set_option autoImplicit false
 
@@ -53,3 +54,25 @@ def Coslice (C : Category) (c : C.obj) :=
 
 notation C " / " c => Slice C c
 notation c " / " C => Coslice C c
+
+def Slice.terminal (C : Category) (c : C.obj) : isTerminal (C / c) ⟨c, ★, C.id c⟩ :=
+begin
+  intro w; constructor;
+  { apply Subtype.mk (w.2.2, ★);
+    { apply Eq.trans; apply C.lid;
+      apply Eq.symm; apply C.lid } };
+  { intro f g; apply Subtype.eq; apply Prod.eq;
+    rw [←C.lid f.1.1]; apply Eq.trans; exact f.2;
+    apply Eq.symm; rw [←C.lid g.1.1]; apply g.2; rfl }
+end
+
+def Coslice.initial (C : Category) (c : C.obj) : isInitial (c / C) ⟨★, c, C.id c⟩ :=
+begin
+  intro w; constructor;
+  { apply Subtype.mk (★, w.2.2);
+    { apply Eq.trans; apply C.rid;
+      apply Eq.symm; apply C.rid } };
+  { intro f g; apply Subtype.eq; apply Prod.eq; rfl;
+    rw [←C.rid f.1.2]; apply Eq.trans; exact Eq.symm f.2;
+    apply Eq.symm; rw [←C.rid g.1.2]; apply Eq.symm g.2 }
+end
