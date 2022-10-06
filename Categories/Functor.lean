@@ -22,7 +22,7 @@ def idfun (C : Category) : Functor C C :=
   idm   := λ _, rfl,
   com   := λ _ _, rfl }
 
-def Functor.comp {A B C : Category} (F : Functor B C) (G : Functor A B) : Functor A C :=
+def comfun {A B C : Category} (F : Functor B C) (G : Functor A B) : Functor A C :=
 { apply := λ x, F (G x),
   map   := λ g, F.map (G.map g),
   idm   := by { intros; dsimp; rw [G.idm, F.idm] },
