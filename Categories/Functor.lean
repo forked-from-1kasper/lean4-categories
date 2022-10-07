@@ -84,3 +84,41 @@ begin
   exists F.map f.1; exists F.map f.2.1; constructor;
   rw [←F.com, f.2.2.1, F.idm]; rw [←F.com, f.2.2.2, F.idm]
 end
+
+def Algebra {C : Category} (F : Functor C C) :=
+Σ (c : C.obj), Hom C (F c) c
+
+def Algebra.hom {C : Category} {F : Functor C C} (Γ₁ Γ₂ : Algebra F) :=
+{ φ : Hom C Γ₁.1 Γ₂.1 // φ ∘ Γ₁.2 = Γ₂.2 ∘ F.map φ }
+
+def Algebra.idhom {C : Category} {F : Functor C C} (Γ : Algebra F) : Algebra.hom Γ Γ :=
+⟨1, begin rw [F.idm]; apply Eq.trans; apply C.lid; apply Eq.symm (C.rid _) end⟩
+
+def Algebra.com {C : Category} {F : Functor C C} {Γ₁ Γ₂ Γ₃ : Algebra F}
+  (φ : Algebra.hom Γ₂ Γ₃) (ψ : Algebra.hom Γ₁ Γ₂) : Algebra.hom Γ₁ Γ₃ :=
+⟨φ.1 ∘ ψ.1, by rw [C.assoc, ψ.2, ←C.assoc, φ.2, C.assoc, F.com]⟩
+
+section
+  variable {C : Category} {F : Functor C C}
+
+  lemma Algebra.lid {Γ₁ Γ₂ : Algebra F} (φ : Algebra.hom Γ₁ Γ₂) : Algebra.com (Algebra.idhom Γ₂) φ = φ :=
+  begin apply Subtype.eq; apply C.lid end
+
+  lemma Algebra.rid {Γ₁ Γ₂ : Algebra F} (φ : Algebra.hom Γ₁ Γ₂) : Algebra.com φ (Algebra.idhom Γ₁) = φ :=
+  begin apply Subtype.eq; apply C.rid end
+
+  lemma Algebra.assoc {Γ₁ Γ₂ Γ₃ Γ₄ : Algebra F} (φ : Algebra.hom Γ₃ Γ₄) (ψ : Algebra.hom Γ₂ Γ₃) (ρ : Algebra.hom Γ₁ Γ₂) :
+    Algebra.com (Algebra.com φ ψ) ρ = Algebra.com φ (Algebra.com ψ ρ) :=
+  begin apply Subtype.eq; apply C.assoc end
+end
+
+def Algebra.category {C : Category} (F : Functor C C) : Category :=
+{ obj   := Algebra F,
+  hom   := Algebra.hom,
+  id    := Algebra.idhom,
+  com   := Algebra.com,
+  lid   := Algebra.lid,
+  rid   := Algebra.rid,
+  assoc := Algebra.assoc }
+
+notation "𝐴𝑙𝑔𝑒𝑏𝑟𝑎" => Algebra.category
