@@ -228,3 +228,21 @@ section
     square   := boundarySquare,
     additive := boundaryAdditive }
 end
+
+section
+  variable {C : Category} [HasInitial C]
+
+  def Natural.initial (F : Functor C C) : Natural (Δ C 0) F :=
+  ⟨λ x, (HasInitial.property (F x)).inh, λ _, (HasInitial.property _).prop _ _⟩
+
+  def Cobordism.trivial : Cobordism C :=
+  { boundary := Δ C 0,
+    ι        := Natural.initial 1,
+    square   := λ _, HasInitial.property,
+    additive :=
+    begin
+      intro a b c i j H x f₁ f₂; exists (HasInitial.property _).inh; constructor;
+      { constructor <;> apply (HasInitial.property _).prop };
+      intros; apply (HasInitial.property _).prop
+    end }
+end

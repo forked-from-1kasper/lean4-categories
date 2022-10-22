@@ -76,3 +76,5 @@ begin
     rw [←C.rid f.1.2]; apply Eq.trans; exact Eq.symm f.2;
     apply Eq.symm; rw [←C.rid g.1.2]; apply Eq.symm g.2 }
 end
+
+def Pointed (C : Category) [H : HasTerminal C] : Category := H.τ / C
