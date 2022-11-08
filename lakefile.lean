@@ -5,5 +5,5 @@ package Categories {
   moreLeanArgs := #["-Dlinter.unusedVariables=false"]
 }
 
-@[defaultTarget]
+@[default_target]
 lean_lib Categories

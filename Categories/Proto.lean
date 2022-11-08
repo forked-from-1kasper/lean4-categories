@@ -24,6 +24,7 @@ notation "ℕ" => Nat
 def ExistsUnique {A : Type u} (P : A → Prop) :=
 { x : A // P x ∧ ∀ y, P y → x = y }
 
+open Lean.TSyntax.Compat in
 macro "∃! " xs:Lean.explicitBinders ", " b:term : term =>
   Lean.expandExplicitBinders ``ExistsUnique xs b
 
