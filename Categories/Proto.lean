@@ -21,6 +21,8 @@ notation "★" => Unit.unit
 notation "𝟐" => Bool
 notation "ℕ" => Nat
 
+instance : HAdd (Type u) (Type v) (Type (max u v)) := ⟨Sum⟩
+
 def ExistsUnique {A : Type u} (P : A → Prop) :=
 { x : A // P x ∧ ∀ y, P y → x = y }
 
@@ -146,3 +148,76 @@ section
   def isoMonoRev : monic φ.2.1 := isoMono φ⁻¹
   def isoEpicRev : epic φ.2.1  := isoEpic φ⁻¹
 end
+
+namespace Join
+  variable (A B : Category)
+
+  def mor := A.obj + B.obj
+
+  def hom : mor A B → mor A B → Type (max _ _)
+  | Sum.inl a, Sum.inl b => Hom A a b
+  | Sum.inr _, Sum.inl _ => 𝟎
+  | Sum.inl _, Sum.inr _ => 𝟏
+  | Sum.inr a, Sum.inr b => Hom B a b
+
+  def id : Π (x : mor A B), hom A B x x
+  | Sum.inl x => A.id x
+  | Sum.inr y => B.id y
+
+  def com : Π {a b c : mor A B}, hom A B b c → hom A B a b → hom A B a c
+  | Sum.inl _, Sum.inl _, Sum.inl _, f, g => A.com f g
+  | Sum.inr _, Sum.inl _, Sum.inl _, _, ε => nomatch ε
+  | Sum.inl _, Sum.inr _, Sum.inl _, ε, _ => nomatch ε
+  | Sum.inr _, Sum.inr _, Sum.inl _, ε, _ => nomatch ε
+  | Sum.inl _, Sum.inl _, Sum.inr _, _, _ => ★
+  | Sum.inr _, Sum.inl _, Sum.inr _, _, ε => nomatch ε
+  | Sum.inl _, Sum.inr _, Sum.inr _, _, _ => ★
+  | Sum.inr _, Sum.inr _, Sum.inr _, f, g => B.com f g
+
+  lemma lid : Π {a b : mor A B} (f : hom A B a b), com A B (id A B b) f = f
+  | Sum.inl _, Sum.inl _, f => A.lid f
+  | Sum.inr _, Sum.inl _, ε => nomatch ε
+  | Sum.inl _, Sum.inr _, _ => rfl
+  | Sum.inr _, Sum.inr _, g => B.lid g
+
+  lemma rid : Π {a b : mor A B} (f : hom A B a b), com A B f (id A B a) = f
+  | Sum.inl _, Sum.inl _, f => A.rid f
+  | Sum.inr _, Sum.inl _, ε => nomatch ε
+  | Sum.inl _, Sum.inr _, _ => rfl
+  | Sum.inr _, Sum.inr _, g => B.rid g
+
+  lemma assoc : Π {a b c d : mor A B} (f : hom A B c d) (g : hom A B b c) (h : hom A B a b), com A B (com A B f g) h = com A B f (com A B g h)
+  | Sum.inl _, Sum.inl _, Sum.inl _, Sum.inl _, f, g, h => A.assoc f g h
+  | Sum.inr _, Sum.inl _, Sum.inl _, Sum.inl _, _, _, ε => nomatch ε
+  | Sum.inl _, Sum.inr _, Sum.inl _, Sum.inl _, _, ε, _ => nomatch ε
+  | Sum.inr _, Sum.inr _, Sum.inl _, Sum.inl _, _, ε, _ => nomatch ε
+  | Sum.inl _, Sum.inl _, Sum.inr _, Sum.inl _, ε, _, _ => nomatch ε
+  | Sum.inr _, Sum.inl _, Sum.inr _, Sum.inl _, ε, _, _ => nomatch ε
+  | Sum.inl _, Sum.inr _, Sum.inr _, Sum.inl _, ε, _, _ => nomatch ε
+  | Sum.inr _, Sum.inr _, Sum.inr _, Sum.inl _, ε, _, _ => nomatch ε
+  | Sum.inl _, Sum.inl _, Sum.inl _, Sum.inr _, _, _, _ => rfl
+  | Sum.inr _, Sum.inl _, Sum.inl _, Sum.inr _, _, _, ε => nomatch ε
+  | Sum.inl _, Sum.inr _, Sum.inl _, Sum.inr _, _, _, _ => rfl
+  | Sum.inr _, Sum.inr _, Sum.inl _, Sum.inr _, _, ε, _ => nomatch ε
+  | Sum.inl _, Sum.inl _, Sum.inr _, Sum.inr _, _, _, _ => rfl
+  | Sum.inr _, Sum.inl _, Sum.inr _, Sum.inr _, _, _, ε => nomatch ε
+  | Sum.inl _, Sum.inr _, Sum.inr _, Sum.inr _, _, _, _ => rfl
+  | Sum.inr _, Sum.inr _, Sum.inr _, Sum.inr _, f, g, h => B.assoc f g h
+end Join
+
+def Join (A B : Category) : Category :=
+{ obj   := A.obj + B.obj,
+  hom   := Join.hom A B,
+  id    := Join.id A B,
+  com   := Join.com A B,
+  lid   := Join.lid A B,
+  rid   := Join.rid A B,
+  assoc := Join.assoc A B }
+
+def Category.cone (C : Category) := Join C 𝟙
+
+def Simplex : ℕ → Category
+|   0   => 𝟘
+| n + 1 => Category.cone (Simplex n)
+
+prefix:5 "𝚫 " => Simplex
