@@ -222,7 +222,9 @@ def Simplex : ℕ → Category
 
 prefix:100 "𝚫 " => Simplex
 
-def thin (C : Category) := ∀ (a b : C.obj) (f g : Hom C a b), f = g
+def thin     (C : Category) := ∀ (a b : C.obj) (f g : Hom C a b), f = g
+def skeletal (C : Category) := ∀ (a b : C.obj), a ≅ b → a = b
+def poset    (C : Category) := thin C ∧ skeletal C
 
 lemma zeroThin : thin 𝟘 := λ ε, nomatch ε
 lemma oneThin : thin 𝟙 := λ _ _ _ _, rfl
