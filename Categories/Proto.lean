@@ -216,11 +216,11 @@ def Join (A B : Category) : Category :=
 
 def Category.cone (C : Category) := Join C 𝟙
 
-def Simplex : ℕ → Category
+def FinSimplex : ℕ → Category
 |   0   => 𝟘
-| n + 1 => Category.cone (Simplex n)
+| n + 1 => Category.cone (FinSimplex n)
 
-prefix:100 "𝚫 " => Simplex
+prefix:100 "𝚫 " => FinSimplex
 
 def thin     (C : Category) := ∀ (a b : C.obj) (f g : Hom C a b), f = g
 def skeletal (C : Category) := ∀ (a b : C.obj), a ≅ b → a = b
@@ -235,9 +235,9 @@ theorem Join.thin {A B : Category} (P : thin A) (Q : thin B) : thin (Join A B)
 | Sum.inl _, Sum.inr _, _, _ => rfl
 | Sum.inr a, Sum.inr b, f, g => Q a b f g
 
-lemma Simplex.thin : ∀ n, thin (𝚫 n)
+lemma FinSimplex.thin : ∀ n, thin (𝚫 n)
 |   0   => zeroThin
-| n + 1 => Join.thin (Simplex.thin n) oneThin
+| n + 1 => Join.thin (FinSimplex.thin n) oneThin
 
 lemma zeroSkeletal : skeletal 𝟘 := λ ε, nomatch ε
 lemma oneSkeletal  : skeletal 𝟙 := λ _ _ _, rfl
@@ -251,12 +251,12 @@ theorem Join.skeletal {A B : Category} (P : skeletal A) (Q : skeletal B) : skele
 theorem Join.poset {A B : Category} (P : poset A) (Q : poset B) : poset (Join A B) :=
 ⟨Join.thin P.1 Q.1, Join.skeletal P.2 Q.2⟩
 
-lemma Simplex.skeletal : ∀ n, skeletal (𝚫 n)
+lemma FinSimplex.skeletal : ∀ n, skeletal (𝚫 n)
 |   0   => zeroSkeletal
-| n + 1 => Join.skeletal (Simplex.skeletal n) oneSkeletal
+| n + 1 => Join.skeletal (FinSimplex.skeletal n) oneSkeletal
 
 lemma zeroPoset : poset 𝟘 := ⟨zeroThin, zeroSkeletal⟩
 lemma onePoset  : poset 𝟙 := ⟨oneThin,  oneSkeletal⟩
 
-theorem Simplex.poset (n : ℕ) : poset (𝚫 n) :=
-⟨Simplex.thin n, Simplex.skeletal n⟩
+theorem FinSimplex.poset (n : ℕ) : poset (𝚫 n) :=
+⟨FinSimplex.thin n, FinSimplex.skeletal n⟩

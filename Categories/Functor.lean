@@ -10,11 +10,11 @@ structure Functor (A B : Category) :=
 (idm   : Π x, @map x x 1 = 1)
 (com   : Π {a b c : A.obj} (f : Hom A b c) (g : Hom A a b), map (f ∘ g) = map f ∘ map g)
 
-lemma Functor.eq {A B : Category} (F G : Functor A B) (h₁ : F.apply = G.apply) (h₂ : HEq (@Functor.map A B F) (@Functor.map A B G)) : F = G :=
-begin cases F; cases G; simp at h₁ h₂; subst h₁; subst h₂; rfl end
-
 instance (A B : Category) : CoeFun (Functor A B) (λ _, A.obj → B.obj) :=
 ⟨Functor.apply⟩
+
+lemma Functor.eq {A B : Category} {F G : Functor A B} (h₁ : F.apply = G.apply) (h₂ : HEq (@Functor.map A B F) (@Functor.map A B G)) : F = G :=
+begin cases F; cases G; simp at h₁ h₂; subst h₁; subst h₂; rfl end
 
 def idfun (C : Category) : Functor C C :=
 { apply := id,
@@ -33,6 +33,12 @@ def Δ {A : Category} (B : Category) (b : B.obj) : Functor A B :=
   map   := λ _, B.id b,
   idm   := λ _, rfl,
   com   := λ _ _, Eq.symm (B.lid _) }
+
+section
+  lemma Functor.lid {A B : Category} (F : Functor A B) : comfun (idfun B) F = F := rfl
+  lemma Functor.rid {A B : Category} (F : Functor A B) : comfun F (idfun A) = F := rfl
+  lemma Functor.assoc {A B C D : Category} (F : Functor C D) (G : Functor B C) (H : Functor A B) : comfun F (comfun G H) = comfun (comfun F G) H := rfl
+end
 
 instance (C : Category) : OfNat (Functor C C) 1 := ⟨idfun C⟩
 
@@ -122,3 +128,14 @@ def Algebra.category {C : Category} (F : Functor C C) : Category :=
   assoc := Algebra.assoc }
 
 notation "𝐴𝑙𝑔𝑒𝑏𝑟𝑎" => Algebra.category
+
+def Simplex : Category :=
+{ obj   := ℕ,
+  hom   := λ n m, Functor (𝚫 n) (𝚫 m),
+  id    := λ k, idfun (𝚫 k),
+  com   := comfun,
+  lid   := Functor.lid,
+  rid   := Functor.rid,
+  assoc := Functor.assoc }
+
+notation:100 "𝚫" => Simplex
