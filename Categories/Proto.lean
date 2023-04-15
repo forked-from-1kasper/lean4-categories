@@ -220,4 +220,19 @@ def Simplex : ℕ → Category
 |   0   => 𝟘
 | n + 1 => Category.cone (Simplex n)
 
-prefix:5 "𝚫 " => Simplex
+prefix:100 "𝚫 " => Simplex
+
+def thin (C : Category) := ∀ (a b : C.obj) (f g : Hom C a b), f = g
+
+lemma zeroThin : thin 𝟘 := λ ε, nomatch ε
+lemma oneThin : thin 𝟙 := λ _ _ _ _, rfl
+
+theorem Join.thin {A B : Category} (P : thin A) (Q : thin B) : thin (Join A B)
+| Sum.inl a, Sum.inl b, f, g => P a b f g
+| Sum.inr _, Sum.inl _, ε, _ => nomatch ε
+| Sum.inl _, Sum.inr _, _, _ => rfl
+| Sum.inr a, Sum.inr b, f, g => Q a b f g
+
+lemma Simplex.thin : ∀ n, thin (𝚫 n)
+|   0   => zeroThin
+| n + 1 => Join.thin (Simplex.thin n) oneThin
