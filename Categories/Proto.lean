@@ -227,7 +227,7 @@ def skeletal (C : Category) := ∀ (a b : C.obj), a ≅ b → a = b
 def poset    (C : Category) := thin C ∧ skeletal C
 
 lemma zeroThin : thin 𝟘 := λ ε, nomatch ε
-lemma oneThin : thin 𝟙 := λ _ _ _ _, rfl
+lemma oneThin  : thin 𝟙 := λ _ _ _ _, rfl
 
 theorem Join.thin {A B : Category} (P : thin A) (Q : thin B) : thin (Join A B)
 | Sum.inl a, Sum.inl b, f, g => P a b f g
@@ -238,3 +238,25 @@ theorem Join.thin {A B : Category} (P : thin A) (Q : thin B) : thin (Join A B)
 lemma Simplex.thin : ∀ n, thin (𝚫 n)
 |   0   => zeroThin
 | n + 1 => Join.thin (Simplex.thin n) oneThin
+
+lemma zeroSkeletal : skeletal 𝟘 := λ ε, nomatch ε
+lemma oneSkeletal  : skeletal 𝟙 := λ _ _ _, rfl
+
+theorem Join.skeletal {A B : Category} (P : skeletal A) (Q : skeletal B) : skeletal (Join A B)
+| Sum.inl a, Sum.inl b, f  => congrArg Sum.inl (P a b f)
+| Sum.inr _, Sum.inl _, ε₁ => nomatch ε₁
+| Sum.inl _, Sum.inr _, ε₂ => nomatch ε₂.2
+| Sum.inr a, Sum.inr b, f  => congrArg Sum.inr (Q a b f)
+
+theorem Join.poset {A B : Category} (P : poset A) (Q : poset B) : poset (Join A B) :=
+⟨Join.thin P.1 Q.1, Join.skeletal P.2 Q.2⟩
+
+lemma Simplex.skeletal : ∀ n, skeletal (𝚫 n)
+|   0   => zeroSkeletal
+| n + 1 => Join.skeletal (Simplex.skeletal n) oneSkeletal
+
+lemma zeroPoset : poset 𝟘 := ⟨zeroThin, zeroSkeletal⟩
+lemma onePoset  : poset 𝟙 := ⟨oneThin,  oneSkeletal⟩
+
+theorem Simplex.poset (n : ℕ) : poset (𝚫 n) :=
+⟨Simplex.thin n, Simplex.skeletal n⟩
