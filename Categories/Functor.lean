@@ -138,4 +138,4 @@ def Simplex : Category :=
   rid   := Functor.rid,
   assoc := Functor.assoc }
 
-notation:100 "𝚫" => Simplex
+notation:max "𝚫" => Simplex

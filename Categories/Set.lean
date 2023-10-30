@@ -1,4 +1,4 @@
-import Categories.Proto
+import Categories.Functor
 
 set_option autoImplicit false
 universe u
@@ -13,3 +13,5 @@ def Set : Category :=
   lid   := λ _, rfl,
   rid   := λ _, rfl,
   assoc := λ _ _ _, rfl }
+
+def SSet := Functor 𝚫ᵒᵖ Set
