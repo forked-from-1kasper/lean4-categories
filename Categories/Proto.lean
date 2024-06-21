@@ -49,11 +49,11 @@ infix:70 (priority := high) " ∘ " => Category.com _
 def Category.zero : Category :=
 { obj   := 𝟎,
   hom   := λ _ _, 𝟎,
-  id    := λ x, nomatch x,
-  com   := λ x _, nomatch x,
-  lid   := λ x, nomatch x,
-  rid   := λ x, nomatch x,
-  assoc := λ x _ _, nomatch x }
+  id    := λ x, (nomatch x),
+  com   := λ x _, (nomatch x),
+  lid   := λ x, (nomatch x),
+  rid   := λ x, (nomatch x),
+  assoc := λ x _ _, (nomatch x) }
 
 notation "𝟘" => Category.zero
 

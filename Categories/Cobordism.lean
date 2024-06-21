@@ -32,6 +32,11 @@ def Cob {C : Category} [HasCoproducts C] (Γ : Cobordism C) (a b : C.obj) :=
 section
   variable {C : Category} [HasCoproducts C] (Γ : Cobordism C)
 
+  def Cob.left  {a b : C.obj} (φ : Cob Γ a b) := φ.1
+  def Cob.right {a b : C.obj} (φ : Cob Γ a b) := φ.2.1
+
+  def Cob.iso {a b : C.obj} (φ : Cob Γ a b) : a + ∂ Γ φ.left ≅ b + ∂ Γ φ.right := φ.2.2
+
   def Cob.refl (a : C.obj) : Cob Γ a a :=
   ⟨a, a, Iso.refl _⟩
 
