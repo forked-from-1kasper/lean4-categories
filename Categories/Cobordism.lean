@@ -45,7 +45,7 @@ section
 
   -- probably there should be easier way to obtain this isomorphism
   def Cob.trans {a b c : C.obj} (φ : Cob Γ a b) (ψ : Cob Γ b c) : Cob Γ a c :=
-  ⟨φ.1 + ψ.1, φ.2.1 + ψ.2.1, coproductApLeft (additiveIso Γ.additive)⁻¹
+  ⟨φ.1 + ψ.1, φ.2.1 + ψ.2.1, coproductApLeft (semiadditiveIso Γ.additive.1)⁻¹
                            ⬝ coproductAssoc _ _ _
                            ⬝ coproductApRight φ.2.2
                            ⬝ (coproductAssoc _ _ _)⁻¹
@@ -53,11 +53,11 @@ section
                            ⬝ coproductAssoc _ _ _
                            ⬝ coproductApRight ψ.2.2
                            ⬝ (coproductAssoc _ _ _)⁻¹
-                           ⬝ coproductApLeft ((coproductComm _ _)⁻¹ ⬝ additiveIso Γ.additive)⟩
+                           ⬝ coproductApLeft ((coproductComm _ _)⁻¹ ⬝ semiadditiveIso Γ.additive.1)⟩
 
   def Cob.boundary {a b : C.obj} (φ : Cob Γ a b) : ∂ Γ a ≅ ∂ Γ b :=
-    (coproductInitialLeft _ _ (Γ.square φ.1))⁻¹ ⬝ additiveIso Γ.additive
-  ⬝ functorIso _ φ.2.2 ⬝ (additiveIso Γ.additive)⁻¹ ⬝ coproductInitialLeft _ _ (Γ.square _)
+    (coproductInitialLeft _ _ (Γ.square φ.1))⁻¹ ⬝ semiadditiveIso Γ.additive.1
+  ⬝ functorIso _ φ.2.2 ⬝ (semiadditiveIso Γ.additive.1)⁻¹ ⬝ coproductInitialLeft _ _ (Γ.square _)
 
   def Cob.idem (m : C.obj) : Cob Γ (∂ Γ m) (∂ Γ (∂ Γ m)) :=
   ⟨∂ Γ m, m, coproductInitialLeft _ _ (Γ.square m) ⬝ (coproductInitialRight _ _ (Γ.square m))⁻¹⟩
@@ -189,6 +189,10 @@ section
       { apply Natural.uniq <;> rfl } }
   end
 
+  instance : HasInitial (𝐶𝑜𝑐𝑜𝑛𝑒 J C) :=
+  { ε        := Cocone.zero 0,
+    property := Cocone.hasInitial }
+
   instance : HasCoproducts (𝐶𝑜𝑐𝑜𝑛𝑒 J C) :=
   { μ        := Cocone.add,
     inl      := Cocone.inl,
@@ -197,7 +201,7 @@ section
 
   def boundaryAdditive : @isAdditive (𝐶𝑜𝑐𝑜𝑛𝑒 J C) (𝐶𝑜𝑐𝑜𝑛𝑒 J C) boundary :=
   begin
-    apply additiveCriteria _ _ _ _;
+    apply additiveCriteria _ _ _ _ _;
     intro D₁ D₂; apply Cocone.iso _ _ _ _; apply colimAdd;
     { exists Natural.recur _ _ (Natural.id _) (Natural.id _); apply Subtype.mk (Natural.inl _ _);
       constructor <;> apply Subtype.eq <;> funext _;
@@ -222,7 +226,12 @@ section
           apply Eq.trans; apply congrArg (· ∘ _);
           apply HasCoproducts.recurβ₂; apply HasColimits.recurβ };
         { intro; apply HasColimits.recurβ } };
-      { apply Subtype.eq; funext _; apply (HasInitial.property _).prop } }
+      { apply Subtype.eq; funext _; apply (HasInitial.property _).prop } };
+    { apply Cocone.iso _ _ _ _; apply colimDelta; apply Sigma.mk _ _;
+      apply Natural.initial; exists Natural.initial _; constructor <;>
+      { apply Subtype.eq; funext; apply (HasInitial.property _).prop };
+      { intro; apply (HasInitial.property _).prop };
+      { intro; apply (HasInitial.property _).prop } }
   end
 
   -- this is generalization of an example linked below
@@ -237,17 +246,16 @@ end
 section
   variable {C : Category} [HasInitial C]
 
-  def Natural.initial (F : Functor C C) : Natural (Δ C 0) F :=
-  ⟨λ x, (HasInitial.property (F x)).inh, λ _, (HasInitial.property _).prop _ _⟩
-
   def Cobordism.trivial : Cobordism C :=
   { boundary := Δ C 0,
     ι        := Natural.initial 1,
     square   := λ _, HasInitial.property,
     additive :=
     begin
+      constructor;
       intro a b c i j H x f₁ f₂; exists (HasInitial.property _).inh; constructor;
       { constructor <;> apply (HasInitial.property _).prop };
-      intros; apply (HasInitial.property _).prop
+      intros; apply (HasInitial.property _).prop;
+      intro o H; apply HasInitial.property
     end }
 end

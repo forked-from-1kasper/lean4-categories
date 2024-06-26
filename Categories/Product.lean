@@ -125,8 +125,11 @@ section
   begin apply Subtype.eq; funext _; subst h₁; subst h₂; apply HasCoproducts.uniq <;> rfl end
 end
 
-def isAdditive {A B : Category} (F : Functor A B) :=
+def isSemiadditive {A B : Category} (F : Functor A B) :=
 ∀ (a b c : A.obj) (i : Hom A a c) (j : Hom A b c), isCoproduct A i j → isCoproduct B (F.map i) (F.map j)
+
+def isAdditive {A B : Category} (F : Functor A B) :=
+isSemiadditive F × ∀ (o : A.obj), isInitial A o → isInitial B (F o)
 
 def coproductIso {C : Category} {a b c₁ c₂ : C.obj} (f₁ : Hom C a c₁) (g₁ : Hom C b c₁) (f₂ : Hom C a c₂) (g₂ : Hom C b c₂)
   (φ : c₁ ≅ c₂) : φ.1 ∘ f₁ = f₂ → φ.1 ∘ g₁ = g₂ → isCoproduct C f₁ g₁ → isCoproduct C f₂ g₂ :=
@@ -160,10 +163,10 @@ begin
     apply (H₁ c₁ f₁ g₁).2.2; constructor <;> apply C.lid }
 end
 
-def additiveCriteria {A B : Category} [HasCoproducts A] [HasCoproducts B]
+def semiadditiveCriteria {A B : Category} [HasCoproducts A] [HasCoproducts B]
   (F : Functor A B) (H : ∀ x y, F x + F y ≅ F (x + y))
   (G₁ : ∀ x y, (H x y).1 ∘ inl (F x) (F y) = F.map (inl x y))
-  (G₂ : ∀ x y, (H x y).1 ∘ inr (F x) (F y) = F.map (inr x y)) : isAdditive F :=
+  (G₂ : ∀ x y, (H x y).1 ∘ inr (F x) (F y) = F.map (inr x y)) : isSemiadditive F :=
 begin
   intro a b c i j G; apply coproductIso (inl _ _) (inr _ _) (F.map i) (F.map j) _ _ _ _;
   apply Iso.trans; apply H; apply functorIso; apply coproductUniq;
@@ -177,8 +180,21 @@ begin
   apply HasCoproducts.property
 end
 
-def additiveIso {A B : Category} [HasCoproducts A] [HasCoproducts B] {F : Functor A B}
-  (H : isAdditive F) {x y : A.obj} : F x + F y ≅ F (x + y) :=
+def additiveCriteria {A B : Category}
+  [HasCoproducts A] [HasCoproducts B] [HasInitial A] [HasInitial B]
+  (F : Functor A B) (H : ∀ x y, F x + F y ≅ F (x + y))
+  (G₁ : ∀ x y, (H x y).1 ∘ inl (F x) (F y) = F.map (inl x y))
+  (G₂ : ∀ x y, (H x y).1 ∘ inr (F x) (F y) = F.map (inr x y))
+  (G₃ : F 0 ≅ 0) : isAdditive F :=
+begin
+  constructor; apply semiadditiveCriteria <;> assumption;
+  { intro o H; apply initialIso; apply HasInitial.property;
+    apply Iso.symm; apply Iso.trans; apply functorIso; apply initialUniq;
+    exact H; apply HasInitial.property; exact G₃ }
+end
+
+def semiadditiveIso {A B : Category} [HasCoproducts A] [HasCoproducts B] {F : Functor A B}
+  (H : isSemiadditive F) {x y : A.obj} : F x + F y ≅ F (x + y) :=
 begin apply coproductUniq; apply HasCoproducts.property; apply H; apply HasCoproducts.property end
 
 def coproductInitialLeft {C : Category} [HasCoproducts C] (a b : C.obj) (H : isInitial C b) : a + b ≅ a :=

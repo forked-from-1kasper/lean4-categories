@@ -62,6 +62,21 @@ class HasColimits (J C : Category) :=
 
 open HasColimits (colim)
 
+def Natural.initial {A B : Category} [HasInitial B] (F : Functor A B) : Natural (Δ B 0) F :=
+⟨λ x, (HasInitial.property (F x)).inh, λ _, (HasInitial.property _).prop _ _⟩
+
+def Cocone.zero {J C : Category} [HasInitial C] (x : C.obj) : Cocone J C :=
+⟨(Δ C 0, x), ⟨λ _, (HasInitial.property x).inh, λ _, (HasInitial.property x).prop _ _⟩⟩
+
+def Cocone.hasInitial {J C : Category} [HasInitial C] : isInitial (𝐶𝑜𝑐𝑜𝑛𝑒 J C) (Cocone.zero 0) :=
+begin
+  intro x; constructor; refine Subtype.mk ?_ ?_;
+  { constructor; apply (HasInitial.property x.1.2).inh; apply Natural.initial };
+  { intro i; apply (HasInitial.property _).prop };
+  { intro f g; apply Subtype.eq; ext; apply (HasInitial.property _).prop;
+    apply Subtype.eq; funext; apply (HasInitial.property _).prop }
+end
+
 def colimInitial {J C : Category} {F : Functor J C} {L : F-cocone} (H₁ : ∀ x, isInitial C (F x)) (H₂ : isColimit L) : isInitial C L.1 :=
 begin
   intro c; let N : F-cocone := ⟨c, ⟨λ _, (H₁ _ _).inh, λ _, (H₁ _ _).prop _ _⟩⟩; constructor; apply (H₂ N).val;
@@ -154,4 +169,10 @@ section
     ⟨colim F + colim G, coneAdd F G⟩
     ⟨colim (Functor.add F G), HasColimits.cone _⟩
     (sumOfColimits F G) (HasColimits.property _)
+end
+
+def colimDelta {J C : Category} [HasInitial C] [HasColimits J C] : colim (J := J) (Δ C 0) ≅ 0 :=
+begin
+  apply initialUniq; apply colimInitial (F := Δ C 0) (L := ⟨colim _, HasColimits.cone _⟩);
+  intro; apply HasInitial.property; apply HasColimits.property; apply HasInitial.property
 end
